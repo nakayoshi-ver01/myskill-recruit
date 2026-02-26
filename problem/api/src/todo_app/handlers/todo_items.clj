@@ -32,16 +32,10 @@
     (既存の値を上書きしないようにするため)
    "
   [
-   {
-    {
-     {item-id :item-id} :path
-     {
-      content :content
-      done :done
-     } :body
-    } :parameters
-   }
-  ]
+   {{{item-id :item-id} :path
+     {content :content
+      done :done} :body
+    } :parameters}]
   ;; TODO: アイテムの更新ロジックを実装してください
   ;; - リクエストから item-id と body (content, done) を取得
   ;; - item-db/update-item! を呼び出して更新
