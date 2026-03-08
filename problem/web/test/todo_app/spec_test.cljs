@@ -46,7 +46,7 @@
 ;; フィルター機能のテスト
 (defn apply-filter 
   "アイテムリストにフィルターを適用する関数
-  problem.web.src.todo_app.state.todo_items.cljs>::filtered-itemsの中身を抜き出す"
+  problem.web.src.todo_app.state.todo_items.cljs>::filtered-itemsの中身を抜き出した"
   [items filter-type]
   (case filter-type
     :active (filterv (complement :done) items)
