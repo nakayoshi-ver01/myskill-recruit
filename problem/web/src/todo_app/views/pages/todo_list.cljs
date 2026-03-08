@@ -174,7 +174,10 @@
 
 (defn- item-content
   [{:keys [id content done]}]
-  (let [[editing? set-editing!] (react/useState false)]
+  (let [
+        [editing? set-editing!] (react/useState false)
+        [content set-content!] (react/useState content)
+        ]
     (if editing?
       [:input {:class [$content-input]
                :auto-focus true
@@ -183,6 +186,7 @@
                           (set-editing! false)
                           (let [v (.. e -target -value)]
                             (when (not= v content)
+                              (set-content! v)
                               (rf/dispatch [::todo-items/update-item id {:content v}]))))
                :on-key-down (fn [e]
                               (when (= (.-key e) "Enter")
@@ -208,25 +212,31 @@
       - on-drop: ドロップ時のコールバック関数
   "
   [item on-drag-start on-drop]
-  [:div {:class [$item]
-         :draggable true
-         :on-drag-start #(on-drag-start (:id item) %)
-         :on-drag-over #(.preventDefault %)
-         :on-drop #(on-drop (:id item) %)}
-   [:span {:class [$drag-handle]} "\u2261"]
-   [:input {:type "checkbox"
-            :class [$checkbox]
-            :checked (:done item)
-            :on-change #(rf/dispatch [::todo-items/update-item
-                                      (:id item)
-                                      {:done (not (:done item))} 
-                                      (.reload (.-location js/window) true)])}]
-   ^{:key (str "content-" (:id item))}
-   [item-content item]
-   ^{:key (str "due-date-" (:id item))}
-   [item-due-date item]
-   ^{:key (str "menu-" (:id item))}
-   [item-menu (:id item)]])
+  ; useState(ある変数とそれをレンダリングする関数を返してくれる関数)
+  ; [入れたい変数 書き換える関数] (react/useState 初期値)
+  (let [[done? set-done!] (react/useState (:done item))]
+    [:div {:class [$item]
+           :draggable true
+           :on-drag-start #(on-drag-start (:id item) %)
+           :on-drag-over #(.preventDefault %)
+           :on-drop #(on-drop (:id item) %)}
+     [:span {:class [$drag-handle]} "\u2261"]
+     [:input {:type "checkbox"
+              :class [$checkbox]
+              :checked done?
+              :on-change (fn [_]
+                           (let [new-done (not done?)]
+                             (set-done! new-done)
+                             (rf/dispatch [::todo-items/update-item
+                                           (:id item)
+                                           {:done new-done}])))}]
+     ^{:key (str "content-" (:id item))}
+     [item-content item]
+     ^{:key (str "due-date-" (:id item))}
+     [item-due-date item]
+     ^{:key (str "menu-" (:id item))}
+     [item-menu (:id item)]]))
+
 
 (defn- filter-buttons
   []
