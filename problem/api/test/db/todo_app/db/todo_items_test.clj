@@ -2,6 +2,7 @@
   (:require
    [clojure.test :refer [deftest is use-fixtures]]
    [todo-app.db.todo-items :as todo-items]
+   [todo-app.handlers.todo-items :as todo-items-api]
    [todo-app.db.todo-lists :as todo-lists]
    [todo-app.test-helpers :refer [testing-with-rollback with-rollback with-test-database]]))
 
@@ -70,3 +71,24 @@
                            (todo-items/reorder-items! [(:id i3) (:id i1) (:id i2)])
                            (let [items (todo-items/get-items-by-list-id (:id list))]
                              (is (= ["C" "A" "B"] (mapv :content items)))))))
+
+(deftest update-item-api-test
+  (testing-with-rollback "apiでアイテムの内容を更新できる"
+                         (let [list (create-test-list!)
+                               item (todo-items/insert-item! {:todo_list_id (:id list)
+                                                              :content "元の内容"
+                                                              :display_order 0})]
+                           (todo-items-api/update-item {:parameters
+                                                        {:path {:item-id (:id item)}
+                                                         :body {:content "新しい内容"}}})
+                           (is (= "新しい内容" (:todo_items/content (todo-items/get-item-by-id (:id item)))))))
+
+  (testing-with-rollback "apiでアイテムの完了状態を更新できる"
+                         (let [list (create-test-list!)
+                               item (todo-items/insert-item! {:todo_list_id (:id list)
+                                                              :content "タスク"
+                                                              :display_order 0})]
+                           (todo-items-api/update-item {:parameters 
+                                                        {:path {:item-id (:id item)}
+                                                         :body {:done true}}})
+                           (is (= true (:todo_items/done (todo-items/get-item-by-id (:id item))))))))
