@@ -107,5 +107,8 @@
                                                               :display_order 0})]
                            (todo-items-api/update-item {:parameters
                                                         {:path {:item-id (:id item)}
+                                                         :body {:done true}}})
+                           (todo-items-api/update-item {:parameters
+                                                        {:path {:item-id (:id item)}
                                                          :body {:done false}}})
                            (is (= false (:todo_items/done (todo-items/get-item-by-id (:id item))))))))
