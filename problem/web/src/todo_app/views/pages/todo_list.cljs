@@ -132,6 +132,12 @@
        ["&:hover" {:background "#1578d3"}]))
 
 (defn- title-view
+  "
+  タイトルの表示と編集を行う関数
+  args:
+    - list-name: 現在のリストの名前
+    - list-id: リストのID
+  "
   [list-name list-id]
   (let [[editing? set-editing!] (react/useState false)]
     (if editing?
@@ -194,6 +200,13 @@
                         (js/console.log "due-date changed:" (.. e -target -value)))}])
 
 (defn- item-view
+  "
+   itemの表示設定を行う関数
+    args:
+      - item: アイテムのデータ (id, content, done など)
+      - on-drag-start: ドラッグ開始時のコールバック関数
+      - on-drop: ドロップ時のコールバック関数
+  "
   [item on-drag-start on-drop]
   [:div {:class [$item]
           :draggable true
@@ -224,19 +237,19 @@
   ;; - todo-app.state.todo-items に ::set-filter, ::current-filter, ::filtered-items が定義済み
   ;; - on-click で rf/dispatch を使ってフィルター状態を更新する
   ;; - 選択中のフィルターに応じてボタンのスタイルを切り替える ($filter-btn-active)
-  (let [current-filter :all]
+  (let [current-filter @(rf/subscribe [::todo-items/current-filter])]
     [:div {:class [$filter-area]}
      (for [[filter-key label] [[:all "すべて"] [:active "未完了"] [:done "完了"]]]
        ^{:key filter-key}
        [:button {:class [$filter-btn (when (= current-filter filter-key) $filter-btn-active)]
-                 :on-click #(js/console.log "filter:" (name filter-key))}
+                 :on-click (fn [_] (rf/dispatch [::todo-items/set-filter filter-key]))}
         label])]))
 
 (defn view
   [match]
   (let [list-id (-> match :parameters :path :list-id)
         lists @(rf/subscribe [::todo-lists/lists])
-        items @(rf/subscribe [::todo-items/items])
+        items @(rf/subscribe [::todo-items/filtered-items])
         current-list (some #(when (= (:id %) list-id) %) lists)
         drag-source (react/useRef nil)]
     [:div {:class [$container]}

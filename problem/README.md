@@ -122,6 +122,7 @@ server の nREPL (port 52004) に接続して使用します。
 ## コード変更の反映
 
 - **フロントエンド** (ClojureScript): ファイル保存時に shadow-cljs が自動でリビルドし、ブラウザに反映されます
+→shadow-cljs.ednでctrl+sで反映
 - **バックエンド** (Clojure): ファイル保存後、REPL で `(reload)` を実行してください
 
 ## テスト実行
